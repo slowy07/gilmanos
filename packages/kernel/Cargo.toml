@@ -1,0 +1,14 @@
+[package]
+name = "kernel"
+version = "0.1.0"
+edition = "2018"
+publish = false
+build = "build.rs"
+
+[lib]
+path = "pkg.rs"
+
+[[package.metadata.build-package.external-files]]
+# Use latest-srpm-url.sh to get this.
+url = "https://cdn.amazonlinux.com/blobstore/cf12975d70edce3beb7042007609dc355b47ce27babb08b436829f7500de6b76/kernel-5.4.95-42.163.amzn2.src.rpm"
+sha512 = "4dcfb86a2664edd9cf08d1f32b388ec6b9874ae62a21fc655aa80599270af5fdf15ff1f4dc250e36e7559a1c8a08901e428823d7c3e212cf13bada298fdf4dbd"

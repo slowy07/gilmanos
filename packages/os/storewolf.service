@@ -1,0 +1,13 @@
+[Unit]
+Description=Datastore creator
+After=migrator.service
+Requires=migrator.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/storewolf --data-store-base-path /var/lib/bottlerocket/datastore
+RemainAfterExit=true
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target

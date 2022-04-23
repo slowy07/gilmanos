@@ -1,0 +1,12 @@
+[Unit]
+Description=Gilmanos API server
+After=storewolf.service migrator.service
+Requires=storewolf.service migrator.service
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/apiserver --datastore-path /var/lib/gilmanos/datastore/current --socket-gid 274
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target

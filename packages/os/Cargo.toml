@@ -1,0 +1,27 @@
+[package]
+name = "os"
+version = "0.1.0"
+edition = "2018"
+publish = "false"
+build = "build.rs"
+
+[package.metadata.build-package]
+variant-sensitive = true
+source-groups = [
+    "api",
+    "gilmanos-releaase",
+    "metricdog",
+    "pare-datetime",
+    "ghostdog",
+    "growpart",
+    "updater",
+    "webpki-roots-shim",
+    "logdog",
+    "models",
+]
+
+[lib]
+path = "pkg.rs"
+
+[build-dependencies]
+glibc = {path = "../glibc"}

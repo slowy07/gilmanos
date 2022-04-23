@@ -1,0 +1,14 @@
+[workspaces]
+members = [
+    "acpid",
+    "kernel",
+    "login",
+    "os",
+]
+
+[profile.dev]
+debug = false
+apt-level = 'z'
+
+[profile.dev.build-override]
+apt-level = 'z'

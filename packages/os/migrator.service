@@ -1,0 +1,11 @@
+[Unit]
+Description=Gilmanos data store migrator
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/migrator --datastore-path /var/lib/gilmanos/datastore/current --migration-directory /var/lib/gilmanos-migrations --root-path /usr/share/updog/root.json --metadata-directory /var/cache/gilmanos-metadata --migrate-to-version-from-os-release
+RemainAfterExit=true
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target

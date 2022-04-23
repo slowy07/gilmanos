@@ -1,0 +1,16 @@
+[Unit]
+Description=Gilmanos userdt configuration system
+
+# need network online to tlk to IMDS
+After=network-online.target apiserver.service
+
+ConditionPathExists=!/var/lib/gilmanos/early-boot-config.ran
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/early-boot-config
+RemainAfterExit=true
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target
