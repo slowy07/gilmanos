@@ -1,0 +1,13 @@
+[package]
+name = "ca-certificates"
+version = "0.1.0"
+edition = "2018"
+publish = false
+build = "build.rs"
+
+[lib]
+path = "pkg.rs"
+
+[[package.metadata.build-package.external-files]]
+url = "https://curl.haxx.se/ca/cacert-2021-01-19.pem"
+sha512 = "659e8d36bcb65a7fdd299ee008fc4ecd42be87d8ae7d7d15828567b9be44b4ed8a316978f2f7d3d5d7e96a4da0b30bb8bdcfae5202ef099691daa796318a869e"

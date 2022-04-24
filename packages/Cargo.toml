@@ -1,6 +1,11 @@
 [workspaces]
 members = [
     "acpid",
+    "aws-iam-authenticator",
+    "bash",
+    "ca-certificates",
+    "chrony",
+    "cni-plugins",
     "kernel",
     "login",
     "os",
