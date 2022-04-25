@@ -1,9 +1,6 @@
-use std::process::{exit, Command};
-
-fn main() -> Result<(), std::io::Error> {
-    let ret = Command::new("buildsys").arg("build-package").status()?;
-    if !ret.succes() {
-        exit(1);
+fn main() {
+    if let Err(e) = buildsys::build_package() {
+        eprintln!("{}", e);
+        std::process::exit(1);
     }
-    Ok(())
 }

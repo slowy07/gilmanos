@@ -2,7 +2,7 @@ Name: %{_cross_os}bash
 Version: 5.0
 Release: 1%{?dist}
 Summary: The GNU Bourne Again shell
-License: GPL-3.0-or-later
+License: GPLv3+
 URL: https://www.gnu.org/software/bash
 Source0: https://ftp.gnu.org/gnu/bash/bash-%{version}.tar.gz
 
@@ -13,9 +13,11 @@ Patch2: bash-5.0-patch-2.patch
 # Disable loadable builtin examples
 Patch127: bash-4.4-no-loadable-builtins.patch
 
+BuildRequires: gcc-%{_cross_target}
 BuildRequires: %{_cross_os}glibc-devel
 BuildRequires: %{_cross_os}ncurses-devel
 BuildRequires: %{_cross_os}readline-devel
+Requires: %{_cross_os}glibc
 Requires: %{_cross_os}ncurses
 Requires: %{_cross_os}readline
 
@@ -78,8 +80,6 @@ make "CPPFLAGS=-D_GNU_SOURCE -DRECYCLES_PIDS -DDEFAULT_PATH_VALUE='\"/usr/local/
 ln -s bash %{buildroot}%{_cross_bindir}/sh
 
 %files
-%license COPYING
-%{_cross_attribution_file}
 %{_cross_bindir}/bash
 %{_cross_bindir}/sh
 %exclude %{_cross_bindir}/bashbug

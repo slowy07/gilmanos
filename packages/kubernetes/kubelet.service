@@ -1,0 +1,34 @@
+[Unit]
+Description=kubernetes kubelet
+Documentation=https://github.com/kubernetes/kubernetes
+After=docker.service configured.target
+Wants=configured.target
+Requires=docker.service
+
+[Service]
+Environment=/etc/kubernetes/kubelet/env
+ExecStartPre=/sbin/iptables -P FORWARD ACCEPT
+ExecStart=/usr/bin/kubelet \
+    --cloud-provider aws \
+    --config /etc/kubernetes/kubelet/config \
+    --kubeconfig /etc/kubernetes/kubelet/kubeconfig \
+    --allow-privileged=true \
+    --container-runtime docker \
+    --network-plugin cni \
+    --root-dir /var/lib/kubelet \
+    --cert-dir /var/lib/kubelet/pki \
+    --volume-plugin-dir /var/lib/kubelet/plugins/volume/exec \
+    --experimental-dockershim-root-directory /var/lib/kubelet/dockershim \
+    --node-ip ${NODE_IP} \
+    --pod-infra-container-image ${POD_INFRA_CONTAINER_IMAGE}
+
+Restart=on-failure
+RestartForceExitStatus=SIGPIPE
+RestartSec=5
+Delegate=yes
+KillMode=process
+CPUAccounting=true
+MemoryAccounting=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,44 +1,29 @@
 %global debug_package %{nil}
 
 Name: %{_cross_os}kernel
-Version: 5.4.95
+Version: 4.19.66
 Release: 1%{?dist}
 Summary: The Linux kernel
-License: GPL-2.0 WITH Linux-syscall-note
+License: GPLv2 and Redistributable, no modification permitted
 URL: https://www.kernel.org/
 # Use latest-srpm-url.sh to get this.
-Source0: https://cdn.amazonlinux.com/blobstore/cf12975d70edce3beb7042007609dc355b47ce27babb08b436829f7500de6b76/kernel-5.4.95-42.163.amzn2.src.rpm
-Source100: config-gilmanos
-
-# Make Lustre FSx work with a newer GCC.
-Patch0001: 0001-lustrefsx-Disable-Werror-stringop-overflow.patch
-
-# Help out-of-tree module builds run `make prepare` automatically.
-Patch1001: 1001-Makefile-add-prepare-target-for-external-modules.patch
-
+Source0: https://cdn.amazonlinux.com/blobstore/d88833a42027a5779606b1da7579281dd2fde351262da02c3f6daf4ef8983b46/kernel-4.19.66-22.57.amzn2.src.rpm
+Source100: config-thar
+Patch0001: 0001-dm-add-support-to-directly-boot-to-a-mapped-device.patch
+Patch0002: 0002-dm-init-fix-const-confusion-for-dm_allowed_targets-a.patch
+Patch0003: 0003-dm-init-fix-max-devices-targets-checks.patch
+Patch0004: 0004-dm-ioctl-fix-hang-in-early-create-error-condition.patch
+Patch0005: 0005-dm-init-fix-incorrect-uses-of-kstrndup.patch
+Patch0006: 0006-dm-init-remove-trailing-newline-from-calls-to-DMERR-.patch
+Patch0007: 0007-lustrefsx-Disable-Werror-stringop-overflow.patch
 BuildRequires: bc
 BuildRequires: elfutils-devel
+BuildRequires: gcc-%{_cross_target}
 BuildRequires: hostname
 BuildRequires: kmod
 BuildRequires: openssl-devel
 
-%global kernel_sourcedir %{_cross_usrsrc}/kernels
-%global kernel_libdir %{_cross_libdir}/modules/%{version}
-
 %description
-%{summary}.
-
-%package devel
-Summary: Configured Linux kernel source for module building
-Requires: %{_cross_os}filesystem
-
-%description devel
-%{summary}.
-
-%package archive
-Summary: Archived Linux kernel source for module building
-
-%description archive
 %{summary}.
 
 %package modules
@@ -96,104 +81,7 @@ find %{buildroot}%{_cross_prefix} \
    \( -name .install -o -name .check -o \
       -name ..install.cmd -o -name ..check.cmd \) -delete
 
-# For out-of-tree kmod builds, we need to support the following targets:
-#   make scripts -> make prepare -> make modules
-#
-# This requires enough of the kernel tree to build host programs under the
-# "scripts" and "tools" directories.
-
-# Any existing ELF objects will not work properly if we're cross-compiling for
-# a different architecture, so get rid of them to avoid confusing errors.
-find arch scripts tools -type f -executable \
-  -exec sh -c "head -c4 {} | grep -q ELF && rm {}" \;
-
-# We don't need to include these files.
-find -type f \( -name \*.cmd -o -name \*.gitignore \) -delete
-
-# Avoid an OpenSSL dependency by stubbing out options for module signing and
-# trusted keyrings, so `sign-file` and `extract-cert` won't be built. External
-# kernel modules do not have access to the keys they would need to make use of
-# these tools.
-sed -i \
-  -e 's,$(CONFIG_MODULE_SIG_FORMAT),n,g' \
-  -e 's,$(CONFIG_SYSTEM_TRUSTED_KEYRING),n,g' \
-  scripts/Makefile
-
-(
-  find * \
-    -type f \
-    \( -name Build\* -o -name Kbuild\* -o -name Kconfig\* -o -name Makefile\* \) \
-    -print
-
-  find arch/%{_cross_karch}/ \
-    -type f \
-    \( -name module.lds -o -name vmlinux.lds.S -o -name Platform -o -name \*.tbl \) \
-    -print
-
-  find arch/%{_cross_karch}/{include,lib}/ -type f ! -name \*.o ! -name \*.o.d -print
-  echo arch/%{_cross_karch}/kernel/asm-offsets.s
-  echo lib/vdso/gettimeofday.c
-
-  for d in \
-    arch/%{_cross_karch}/tools \
-    arch/%{_cross_karch}/kernel/vdso ; do
-    [ -d "${d}" ] && find "${d}/" -type f -print
-  done
-
-  find include -type f -print
-  find scripts -type f ! -name \*.l ! -name \*.y ! -name \*.o -print
-
-  find tools/{arch/%{_cross_karch},include,objtool,scripts}/ -type f ! -name \*.o -print
-  echo tools/build/fixdep.c
-  find tools/lib/subcmd -type f -print
-  find tools/lib/{ctype,string,str_error_r}.c
-
-  echo kernel/bounds.c
-  echo kernel/time/timeconst.bc
-  echo security/selinux/include/classmap.h
-  echo security/selinux/include/initial_sid_to_string.h
-
-  echo .config
-  echo Module.symvers
-  echo System.map
-) | sort -u > kernel_devel_files
-
-# Create squashfs of kernel-devel files (ie. /usr/src/kernels/<version>).
-#
-# -no-exports:
-# The filesystem does not need to be exported via NFS.
-#
-# -all-root:
-# Make all files owned by root rather than the build user.
-#
-# -comp zstd:
-# zstd offers compression ratios like xz and decompression speeds like lz4.
-SQUASHFS_OPTS="-no-exports -all-root -comp zstd"
-mkdir -p src_squashfs/%{version}
-tar c -T kernel_devel_files | tar x -C src_squashfs/%{version}
-mksquashfs src_squashfs kernel-devel.squashfs ${SQUASHFS_OPTS}
-
-# Create a tarball of the same files, for use outside the running system.
-# In theory we could extract these files with `unsquashfs`, but we do not want
-# to require it to be installed on the build host, and it errors out when run
-# inside Docker unless the limit for open files is lowered.
-tar cf kernel-devel.tar src_squashfs/%{version} --transform='s|src_squashfs/%{version}|kernel-devel|'
-xz -T0 kernel-devel.tar
-
-install -D kernel-devel.squashfs %{buildroot}%{_cross_datadir}/gilmanos/kernel-devel.squashfs
-install -D kernel-devel.tar.xz %{buildroot}%{_cross_datadir}/gilmanos/kernel-devel.tar.xz
-install -d %{buildroot}%{kernel_sourcedir}
-
-# Replace the incorrect links from modules_install. These will be bound
-# into a host container (and unused in the host) so they must not point
-# to %{_cross_usrsrc} (eg. /x86_64-gilmanos-linux-gnu/sys-root/...)
-rm -f %{buildroot}%{kernel_libdir}/build %{buildroot}%{kernel_libdir}/source
-ln -sf %{_usrsrc}/kernels/%{version} %{buildroot}%{kernel_libdir}/build
-ln -sf %{_usrsrc}/kernels/%{version} %{buildroot}%{kernel_libdir}/source
-
 %files
-%license COPYING LICENSES/preferred/GPL-2.0 LICENSES/exceptions/Linux-syscall-note
-%{_cross_attribution_file}
 /boot/vmlinuz
 /boot/config
 /boot/System.map
@@ -225,12 +113,5 @@ ln -sf %{_usrsrc}/kernels/%{version} %{buildroot}%{kernel_libdir}/source
 %{_cross_includedir}/sound/*
 %{_cross_includedir}/video/*
 %{_cross_includedir}/xen/*
-
-%files devel
-%dir %{kernel_sourcedir}
-%{_cross_datadir}/gilmanos/kernel-devel.squashfs
-
-%files archive
-%{_cross_datadir}/gilmanos/kernel-devel.tar.xz
 
 %changelog

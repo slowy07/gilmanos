@@ -9,8 +9,16 @@ build = "build.rs"
 path = "pkg.rs"
 
 [[package.metadata.build-package.external-files]]
-url = "https://github.com/containernetworking/plugins/archive/v0.9.1/plugins-0.9.1.tar.gz"
-sha512 = "24e8fcedbff2ae7a83aa96085b546b164de6a0884d593e3b5386e9d2de3c4d9a215db9e9405332020cc45c371709a32b600e263e4f8dee62c51adafdc0180f24"
+url = "https://github.com/containernetworking/plugins/archive/v0.8.0/plugins-0.8.0.tar.gz"
+sha512 = "de685a66e0e875e8a2209b76c5d1f5fd0e426804e3db6084cf2e89695a8b1876eae47ff1fcfdf065a3b027918fe7c4775d2321358402dbd1206928538edb52b4"
 
 [build-dependencies]
-glibc = { path = "../glibc" }
+buildsys = { path = "../../tools/buildsys" }
+glibc = { path = "../glibc", optional=true }
+golang = { path = "../golang", optional=true }
+
+[features]
+cascade = [
+    "glibc",
+    "golang",
+]
