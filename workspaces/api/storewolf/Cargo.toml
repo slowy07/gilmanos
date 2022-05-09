@@ -1,0 +1,42 @@
+[package]
+name = "storewolf"
+version = "0.1.0"
+authors = ["Zac Mrowicki <mrowicki@amazon.com>"]
+license = "Apache-2.0 OR MIT"
+edition = "2018"
+publish = false
+build = "build.rs"
+# Don't rebuild crate just because of changes to README.
+exclude = ["README.md"]
+
+[dependencies]
+gilmanos-release = { path = "../../gilmanos-release" }
+datastore = { path = "../datastore" }
+log = "0.4"
+models = { path = "../../models" }
+rand = { version = "0.8", default-features = false, features = ["std", "std_rng"] }
+semver = "0.11"
+simplelog = "0.9"
+snafu = "0.6"
+toml = "0.5"
+
+[build-dependencies]
+cargo-readme = "3.1"
+merge-toml = { path = "merge-toml" }
+# We have a models build-dep because we read default settings from the models
+# directory and need its build.rs to run first; we also reflect the dependency
+# with cargo:rerun-if-changed statements in our build.rs.  The models build.rs
+# runs twice, once for the above dependency and once for this build-dependency;
+# there's a check in models build.rs to skip running the second time.
+models = { path = "../../models" }
+snafu = "0.6"
+toml = "0.5"
+walkdir = "2"
+
+[[bin]]
+name = "storewolf"
+path = "src/main.rs"
+
+[lib]
+name = "storewolf"
+path = "src/lib.rs"
