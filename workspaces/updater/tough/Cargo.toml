@@ -1,0 +1,26 @@
+[package]
+name = "tough"
+version = "0.1.0"
+authors = ["iliana destroyer of worlds <iweller@amazon.com>"]
+edition = "2018"
+publish = false
+
+[dependencies]
+chrono = { version = "0.4.6", features = ["serde"] }
+hex = "0.3.2"
+reqwest = { version = "0.9.17", default-features = false }
+serde = "1.0.92"
+serde_json = "1.0.39"
+sha2 = "0.8.0"
+snafu = "0.5.0"
+tough_schema = { path = "../tough_schema" }
+
+[dev-dependencies]
+hex-literal = "0.2.0"
+tempfile = "3.1.0"
+
+[features]
+default = ["rustls-tls"]
+default-tls = ["reqwest/default-tls"]
+default-tls-vendored = ["reqwest/default-tls-vendored"]
+rustls-tls = ["reqwest/rustls-tls"]
