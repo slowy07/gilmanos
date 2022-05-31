@@ -11,8 +11,8 @@ require (
 	github.com/containerd/ttrpc v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
-	github.com/opencontainers/runc v1.0.0-rc8
-	github.com/opencontainers/runtime-spec v1.0.2
+	github.com/opencontainers/runc v1.1.2
+	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417
 	github.com/opencontainers/selinux v1.10.1 // indirect
 	github.com/pkg/errors v0.9.1
 	go.etcd.io/bbolt v1.3.6 // indirect
