@@ -1,0 +1,41 @@
+[package]
+name = "ecs-agent"
+version = "0.1.0"
+edition = "2018"
+publish = false
+build = "build.rs"
+
+[lib]
+path = "pkg.rs"
+
+# ECS agent
+[package.metadata.build-package]
+releases-url = "https://github.com/aws/amazon-ecs-agent/releases"
+
+[[package.metadata.build-package.external-files]]
+url = "https://github.com/aws/amazon-ecs-agent/archive/v1.61.2/amazon-ecs-agent-v1.61.2.tar.gz"
+sha512 = "0b51cbd6dbc9056305a5b04d41156c7ae7460d11e8717c295567a0d4ed781fe654f97594759621a6713b580ea4d598c072f311fea900dc72b09b05d63e771fe5"
+
+# The ECS agent repository includes two CNI plugins as git submodules.  git
+# archive does not include submodules, so the tarball above does not include
+# the source of those plugins.  Instead, we include the CNI plugin source
+# directly.
+[[package.metadata.build-package.external-files]]
+url = "https://github.com/aws/amazon-ecs-cni-plugins/archive/55b2ae77ee0bf22321b14f2d4ebbcc04f77322e1/amazon-ecs-cni-plugins.tar.gz"
+sha512 = "42e2dad0741f02a3b0d675c0f512557a118cef6df7e9d989a35c73d02484912d800453148abbf6d8424c5e40d2662745a9aef4a68cb2f610d9defc976e394f1f"
+
+[[package.metadata.build-package.external-files]]
+url = "https://github.com/aws/amazon-vpc-cni-plugins/archive/199bfc65cced4951cbb6a38e6e828afa8c2b023c/amazon-vpc-cni-plugins.tar.gz"
+sha512 = "ee1c2230c43fa7b8b9a25319bd334abfc08210ea8956ccc4525fe936b48b22b85df778823138d58687e847762b436daa0e0ba69c210a00b173f9b933f656386d"
+
+# RPM BuildRequires
+[build-dependencies]
+glibc = { path = "../glibc" }
+
+# RPM Requires
+[dependencies]
+# `docker-engine` is only needed at runtime, and is included in the variant
+# definition.
+# docker-engine = { path = "../docker-engine" }
+# `iptables` is only needed at runtime, and is pulled in by `release`.
+# iptables = { path = "../iptables" }
