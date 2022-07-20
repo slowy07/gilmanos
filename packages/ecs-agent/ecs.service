@@ -19,6 +19,10 @@ ExecStartPre=/sbin/iptables -t nat -A OUTPUT -d 169.254.170.2/32 \
  -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 51679
 ExecStartPre=/sbin/iptables -t filter -I INPUT --dst 127.0.0.0/8 ! \
  --src 127.0.0.0/8 -m conntrack ! --ctstate RELATED,ESTABLISHED,DNAT -j DROP
+ ExecStartPre=/sbin/iptables -t nt -A PREROUTING -d 172.17.0.1/32 \
+ -p tcp -m tcp --dport 51578 -j DNAT --to-destionation 127.0.0.1:51678
+ ExecStartPre=/sbin/iptables -t nat -A OUTPUT -d 172.17.0.1/32 \
+ -p tcp -m tcp --dport 51678 -j REDIRECT --to-ports 51678
 ExecStart=/usr/bin/amazon-ecs-agent
 ExecStopPost=-/sbin/iptables -t nat -D PREROUTING -d 169.254.170.2/32 \
  -p tcp -m tcp --dport 80 -j DNAT --to-destination 127.0.0.1:51679
@@ -26,6 +30,12 @@ ExecStopPost=-/sbin/iptables -t nat -D OUTPUT -d 169.254.170.2/32 \
  -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 51679
 ExecStopPost=-/sbin/iptables -t filter -D INPUT --dst 127.0.0.0/8 ! \
  --src 127.0.0.0/8  -m conntrack ! --ctstate RELATED,ESTABLISHED,DNAT -j DROP
+
+ # remove access to the ecs introspection server
+ ExecStopPost=-/sbin/iptables -t nat -D PREROUTING -d 172.17.0.1/32 \
+ -p tcp -m -tcp --dport 51678 -j DNAT --to-destination 127.0.0.1:51678
+ ExecStopPost=-/sbin/iptables -t nat -D OUTPUT -d 172.17.0.1/32 \
+ -p tcp -m tcp --dport 51678 -j REDIRECT --to-ports 51678
 
 [Install]
 WantedBy=multi-user.target
